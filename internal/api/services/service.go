@@ -2,7 +2,6 @@ package services
 
 import (
 	"api/url-shorter/internal/db"
-	"api/url-shorter/internal/pkg/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -27,10 +26,7 @@ func TestData() ([]string, error) {
 }
 
 func InsertUrlDocument(BaseUrl string, urlHash string) (string, error) {
-	urlHash, hashErr := utils.GenerateRandomBase64Hash(8)
-	if hashErr != nil {
-		return "", errors.New("Failed to generate short URL")
-	}
+
 	doc := UrlHash{
 		ID:        primitive.NewObjectID(),
 		BaseUrl:   BaseUrl,

@@ -11,6 +11,7 @@ func SetupRouters() *gin.Engine {
 
 	router.GET("/test", handlers.GetTestHandler)
 	router.POST("/shorten", handlers.ShortenUrl)
+	router.POST("/shorten/with-alias", handlers.ShortenUrlWithAlias)
 	router.GET("/:id", handlers.GetShortenedURL)
 
 	return router
