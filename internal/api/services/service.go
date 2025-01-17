@@ -4,13 +4,13 @@ import (
 	"api/url-shorter/internal/db"
 	"api/url-shorter/internal/pkg/utils"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UrlHash struct {
@@ -50,9 +50,13 @@ func GetUrlDocumentByID(id string) (string, error) {
 
 	err := db.GetCollection("url-hashes").FindOne(context.TODO(), bson.M{"hash": id}).Decode(&result)
 	if err != nil {
-		return "", errors.New("Doc not found")
+		if err == mongo.ErrNoDocuments {
+			return "", errors.New("document not found")
+		}
+		return "", fmt.Errorf("failed to fetch document: %v", err)
 	}
-	resultJSON, err := json.Marshal(result)
-	fmt.Printf("doc: %v", string(resultJSON))
-	return "done", nil
+
+	redirectUrl := result.BaseUrl
+
+	return redirectUrl, nil
 }

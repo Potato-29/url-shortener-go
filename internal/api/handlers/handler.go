@@ -44,11 +44,11 @@ func GetShortenedURL(c *gin.Context) {
 	id := c.Param("id")
 
 	// Fetch the shortened URL document by ID
-	urlDoc, err := services.GetUrlDocumentByID(id)
+	redirectUrl, err := services.GetUrlDocumentByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "URL not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": err})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": urlDoc})
+	c.Redirect(301, redirectUrl)
 }
