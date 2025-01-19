@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -38,7 +39,7 @@ func InsertUrlDocument(BaseUrl string, urlHash string) (string, error) {
 	if insertErr != nil {
 		return "", errors.New("Failed to save shortened URL")
 	}
-	return "http://localhost:5000/" + urlHash, nil
+	return os.Getenv("BASEURL") + urlHash, nil
 }
 
 func GetUrlDocumentByID(id string) (string, error) {

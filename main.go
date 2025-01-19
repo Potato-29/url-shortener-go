@@ -3,13 +3,15 @@ package main
 import (
 	"api/url-shorter/internal/api/routers"
 	"api/url-shorter/internal/db"
+	"fmt"
+	"os"
 )
 
 func main() {
-	uri := "mongodb+srv://testuser29:Test%40123@testcluster0.ppxbwit.mongodb.net/?retryWrites=true&w=majority&appName=testCluster0"
+	uri := os.Getenv("MONGO_URI")
 	db.ConnectDB(uri)
 
 	router := routers.SetupRouters()
 
-	router.Run("localhost:5000")
+	router.Run(fmt.Sprintf("%s", os.Getenv("PORT")))
 }
