@@ -8,10 +8,11 @@ import (
 )
 
 func main() {
-	uri := os.Getenv("MONGO_URI")
+	uri := os.Getenv("MONGOURI")
 	db.ConnectDB(uri)
 
 	router := routers.SetupRouters()
 
-	router.Run(fmt.Sprintf("%s", os.Getenv("PORT")))
+	fmt.Printf("PORT: %v", os.Getenv("PORT"))
+	router.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }
