@@ -12,6 +12,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+func RenderHome(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"Title":   "URL Shortener",
+		"Message": "Test Page",
+	})
+}
+
 func GetTestHandler(c *gin.Context) {
 	res, err := services.TestData()
 	if err != nil {
@@ -22,19 +29,22 @@ func GetTestHandler(c *gin.Context) {
 }
 
 func ShortenUrl(c *gin.Context) {
-	var input struct {
-		BaseUrl string `json:"base-url"`
-	}
 	var duplicate services.UrlHash
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
-		return
-	}
+	input := c.PostForm("base-url")
+	alias := c.PostForm("alias")
 
-	urlHash, hashErr := utils.GenerateRandomBase64Hash(8)
-	if hashErr != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate short URL"})
-		return
+	var urlHash string
+	var hashErr error
+
+	if alias == "" {
+		fmt.Printf("null alias: %v", alias)
+		urlHash, hashErr = utils.GenerateRandomBase64Hash(8)
+		if hashErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate short URL"})
+			return
+		}
+	} else {
+		urlHash = alias
 	}
 
 	err := db.GetCollection("url-hashes").FindOne(context.TODO(), bson.M{"hash": urlHash}).Decode(&duplicate)
@@ -43,51 +53,21 @@ func ShortenUrl(c *gin.Context) {
 		ShortenUrl(c)
 	}
 
-	result, err := services.InsertUrlDocument(input.BaseUrl, urlHash)
+	result, err := services.InsertUrlDocument(input, urlHash)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "URL shortened successfully",
-		"data":    result,
+
+	c.HTML(http.StatusOK, "response.html", gin.H{
+		"ShortenedURL": result,
 	})
 	return
-}
-
-func ShortenUrlWithAlias(c *gin.Context) {
-	var input struct {
-		BaseUrl string `json:"base-url"`
-		Alias   string `json:"alias"`
-	}
-	var duplicate services.UrlHash
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
-		return
-	}
-
-	err := db.GetCollection("url-hashes").FindOne(context.TODO(), bson.M{"hash": input.Alias}).Decode(&duplicate)
-	fmt.Printf("MY ERR: %v \n", err)
-	if err == nil {
-		c.JSON(http.StatusConflict, "Please use a unique alias!")
-		return
-	}
-	fmt.Printf("aliassss: %v \n", input.Alias)
-	result, err := services.InsertUrlDocument(input.BaseUrl, input.Alias)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "URL shortened successfully",
-		"data":    result,
-	})
 }
 
 func GetShortenedURL(c *gin.Context) {
 	id := c.Param("id")
 
-	// Fetch the shortened URL document by ID
 	redirectUrl, err := services.GetUrlDocumentByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err})

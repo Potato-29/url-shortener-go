@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org"></script>
+  </head>
+  <body class="bg-gray-100 flex flex-col items-center min-h-screen py-10">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-blue-600">URL Shortener</h1>
+    </header>
+
+    <main class="w-full max-w-lg bg-white shadow-md rounded-lg p-6">
+      <!-- Form with htmx attributes -->
+      <form
+        hx-post="/api/shorten"
+        hx-target="#shortened-url-container"
+        hx-swap="innerHTML"
+        class="space-y-4"
+      >
+        <div>
+          <label for="url" class="block text-sm font-medium text-gray-700"
+            >Enter URL</label
+          >
+          <input
+            type="url"
+            id="base-url"
+            name="base-url"
+            placeholder="https://example.com"
+            required
+            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label for="alias" class="block text-sm font-medium text-gray-700"
+            >Enter Alias</label
+          >
+          <input
+            type="alias"
+            id="alias"
+            name="alias"
+            placeholder="that-one-doc"
+            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          Shorten URL
+        </button>
+      </form>
+
+      <!-- Container for displaying the shortened URL -->
+      <div id="shortened-url-container"></div>
+    </main>
+
+    <footer class="mt-8 text-gray-500 text-sm">
+      Just a basic URL Shortener built using Go + htmx :)
+    </footer>
+  </body>
+</html>
